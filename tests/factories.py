@@ -1,4 +1,4 @@
-from factory import Faker, SelfAttribute, Sequence, SubFactory
+from factory import Faker, Sequence, SubFactory
 from factory.alchemy import SQLAlchemyModelFactory
 
 from connections.database import db
@@ -26,7 +26,6 @@ class PersonFactory(BaseFactory):
     class Meta:
 
         model = Person
-        force_flush = True
 
 
 class ConnectionFactory(BaseFactory):
@@ -34,12 +33,9 @@ class ConnectionFactory(BaseFactory):
 
     connection_type = 'friend'
 
-    from_person_id = SelfAttribute('from_person.id')
     from_person = SubFactory(PersonFactory)
-    to_person_id = SelfAttribute('to_person.id')
     to_person = SubFactory(PersonFactory)
 
     class Meta:
 
         model = Connection
-        exclude = ('from_person', 'to_person')

@@ -12,7 +12,6 @@ class BaseModelSchema(ma.ModelSchema):
 
 
 class PersonSchema(BaseModelSchema):
-    email = fields.Email()
 
     class Meta:
         model = Person
