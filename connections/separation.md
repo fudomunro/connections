@@ -20,7 +20,7 @@ Further on the topic of performance, it shouldn't be too difficult to allow this
 
 ## Questions
 
- - Do we only want to return the people who are exactly X degrees separated, are all people up to and including that many degrees of separation? (ASSUMPTION: Yes)
+ - Do we only want to return the people who are exactly X degrees separated, or all people up to and including that many degrees of separation? (ASSUMPTION: Yes)
    - If Yes: do we strip out people who were found at earlier degrees of separation? (Bob is friends with Sarah and Meg, who are also friends. Does Bob have any 2 degree separations, or only 1 degree?) (ASSUMPTION: Yes)
    - If No: do we need to return the degree of separation along with each person?
  - Is there a maximum supported degrees of separation? (ASSUMPTION: 6)
@@ -85,7 +85,7 @@ This points towards a need to complete traversing each degree of separation befo
 def extract_people(person, degrees):
     candidates = [person]
     visited = Set()
-    for _ in range degrees:
+    for _ in range(degrees):
         candidates = {connection.to_person
             for connection in person.connections
             for person in candidates
