@@ -25,3 +25,9 @@ class ConnectionSchema(BaseModelSchema):
 
     class Meta:
         model = Connection
+
+class ConnectionUpdateSchema(ConnectionSchema):
+
+    class Meta:
+        model = Connection
+        exclude = ('from_person_id', 'to_person_id')

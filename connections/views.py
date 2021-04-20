@@ -1,11 +1,12 @@
 from http import HTTPStatus
 
 from flask import Blueprint, jsonify
+from sqlalchemy.orm.exc import NoResultFound
 from webargs.flaskparser import use_args
 
 from connections.models.connection import Connection
 from connections.models.person import Person
-from connections.schemas import ConnectionSchema, PersonSchema
+from connections.schemas import ConnectionSchema, ConnectionUpdateSchema, PersonSchema
 
 blueprint = Blueprint('connections', __name__)
 
@@ -47,3 +48,22 @@ def get_connections():
 def create_connection(connection):
     connection.save()
     return ConnectionSchema().jsonify(connection), HTTPStatus.CREATED
+
+
+UPDATEABLE_FIELDS = ["connection_type"]
+
+@blueprint.route('/connections/<connection_id>', methods=['PATCH'])
+@use_args(ConnectionUpdateSchema(), locations=('json',))
+def update_connection(connection_update, connection_id):
+    try:
+        connection = Connection.query.filter(Connection.id==connection_id).one()
+        for field in UPDATEABLE_FIELDS:
+            new_value = getattr(connection_update, field, None)
+            if new_value:
+                setattr(connection, field, new_value)
+
+        connection.save()
+        return '', HTTPStatus.NO_CONTENT
+    except NoResultFound as e:
+        return jsonify({'description': 'Resource not found.', 
+                        'errors': {'connection_id': ['No connection found with this ID']}}), HTTPStatus.GONE
