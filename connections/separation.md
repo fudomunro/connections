@@ -1,4 +1,4 @@
-# Six degreees of separation
+# Six degrees of separation
 
 ## The Task
 
