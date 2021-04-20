@@ -1,9 +1,10 @@
 from http import HTTPStatus
 
-from connections.models.connection import ConnectionType
 from tests.factories import ConnectionFactory, PersonFactory
 # Importing from other tests is usually fine, but only if they are all being run together
 from tests.functional.people.test_get_people import EXPECTED_FIELDS as EXPECTED_PERSON_FIELDS
+
+from connections.models.connection import ConnectionType
 
 EXPECTED_FIELDS = [
     'id',
@@ -30,7 +31,8 @@ def test_can_get_connections(db, testapp):
 def test_can_get_connection_people(db, testapp):
     from_person = PersonFactory()
     to_person = PersonFactory()
-    ConnectionFactory(from_person=from_person, to_person=to_person, connection_type=ConnectionType.friend)
+    ConnectionFactory(from_person=from_person, to_person=to_person,
+                      connection_type=ConnectionType.friend)
     db.session.commit()
 
     res = testapp.get('/connections')
@@ -39,7 +41,7 @@ def test_can_get_connection_people(db, testapp):
 
     # Because we're not currently tearing down between tests, this is 11
     assert len(res.json) == 11
-    
+
     connection = res.json[10]
 
     assert connection['from_person']['id'] == from_person.id

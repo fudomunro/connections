@@ -26,6 +26,7 @@ class ConnectionSchema(BaseModelSchema):
     class Meta:
         model = Connection
 
+
 class ConnectionUpdateSchema(ConnectionSchema):
 
     class Meta:

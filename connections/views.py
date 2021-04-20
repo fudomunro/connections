@@ -11,6 +11,10 @@ from connections.schemas import ConnectionSchema, ConnectionUpdateSchema, Person
 blueprint = Blueprint('connections', __name__)
 
 
+def person_json(person):
+    return dict([(f, getattr(person, f)) for f in ['id', 'first_name', 'last_name', 'email']])
+
+
 @blueprint.route('/people', methods=['GET'])
 def get_people():
     people_schema = PersonSchema(many=True)
@@ -27,20 +31,17 @@ def create_person(person):
 
 @blueprint.route('/connections', methods=['GET'])
 def get_connections():
-    # TODO: is many needed here?
-    connection_schema = ConnectionSchema(many=True)
-    people_schema = PersonSchema(many=True)
     connections = Connection.query.all()
-    person_json = lambda p: dict([(f, getattr(p, f)) for f in ['id', 'first_name', 'last_name', 'email']])
 
-    # It didn't seem to make sense to alter the schema just to get an expanded representation of a person
+    # It didn't seem to make sense to alter the schema just to get an expanded representation
     return jsonify(list({
         'id': connection.id,
-        'from_person': person_json(Person.query.filter(Person.id==connection.from_person_id).one()),
-        'to_person': person_json(Person.query.filter(Person.id==connection.to_person_id).one()),
+        'from_person':
+            person_json(Person.query.filter(Person.id == connection.from_person_id).one()),
+        'to_person': person_json(Person.query.filter(Person.id == connection.to_person_id).one()),
         'connection_type': connection.connection_type.value
-    }
-    for connection in connections)), HTTPStatus.OK
+        }
+        for connection in connections)), HTTPStatus.OK
 
 
 @blueprint.route('/connections', methods=['POST'])
@@ -50,13 +51,14 @@ def create_connection(connection):
     return ConnectionSchema().jsonify(connection), HTTPStatus.CREATED
 
 
-UPDATEABLE_FIELDS = ["connection_type"]
+UPDATEABLE_FIELDS = ['connection_type']
+
 
 @blueprint.route('/connections/<connection_id>', methods=['PATCH'])
 @use_args(ConnectionUpdateSchema(), locations=('json',))
 def update_connection(connection_update, connection_id):
     try:
-        connection = Connection.query.filter(Connection.id==connection_id).one()
+        connection = Connection.query.filter(Connection.id == connection_id).one()
         for field in UPDATEABLE_FIELDS:
             new_value = getattr(connection_update, field, None)
             if new_value:
@@ -64,6 +66,7 @@ def update_connection(connection_update, connection_id):
 
         connection.save()
         return '', HTTPStatus.NO_CONTENT
-    except NoResultFound as e:
-        return jsonify({'description': 'Resource not found.', 
-                        'errors': {'connection_id': ['No connection found with this ID']}}), HTTPStatus.GONE
+    except NoResultFound:
+        return jsonify({'description': 'Resource not found.',
+                        'errors': {'connection_id': ['No connection found with this ID']}}),
+        HTTPStatus.GONE
