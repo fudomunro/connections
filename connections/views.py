@@ -67,6 +67,7 @@ def update_connection(connection_update, connection_id):
         connection.save()
         return '', HTTPStatus.NO_CONTENT
     except NoResultFound:
-        return jsonify({'description': 'Resource not found.',
-                        'errors': {'connection_id': ['No connection found with this ID']}}),
-        HTTPStatus.GONE
+        return (
+            jsonify({'description': 'Resource not found.',
+                     'errors': {'connection_id': ['No connection found with this ID']}}),
+            HTTPStatus.GONE)
