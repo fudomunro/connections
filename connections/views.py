@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from sqlalchemy.orm.exc import NoResultFound
 from webargs.flaskparser import use_args
 
@@ -19,6 +19,17 @@ def person_json(person):
 def get_people():
     people_schema = PersonSchema(many=True)
     people = Person.query.all()
+    return people_schema.jsonify(people), HTTPStatus.OK
+
+
+@blueprint.route('/people/<person_id>/mutual_friends', methods=['GET'])
+def get_mutual_friends(person_id):
+    target_id = int(request.args['target_id'])
+    people_schema = PersonSchema(many=True)
+
+    person = Person.query.filter(Person.id == person_id).one()
+    target = Person.query.filter(Person.id == target_id).one()
+    people = person.mutual_friends(target)
     return people_schema.jsonify(people), HTTPStatus.OK
 
 
